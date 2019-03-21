@@ -68,6 +68,7 @@ testDebug:
   dependencies:
     - buildDebug
   script:
+    - chmod +x gradlew  
     - bundle exec fastlane test
 
 .promote_job:
@@ -76,6 +77,7 @@ testDebug:
   dependencies: []
   before_script:
     - echo You need to add your google_play_api_key.json file for this to work. Please see project's README.md. && false
+    - chmod +x gradlew    
   after_script:
     - rm -f ~/google_play_api_key.json
 
