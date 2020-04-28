@@ -29,5 +29,5 @@ RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all -
 # install FastLane
 COPY Gemfile.lock .
 COPY Gemfile .
-RUN gem install bundle
+RUN gem install bundler -v 1.16.6
 RUN bundle install
