@@ -1,6 +1,6 @@
 # This Dockerfile creates a static build image for CI
 
-FROM openjdk:17
+FROM eclipse-temurin:17
 
 # Just matched `app/build.gradle`
 ENV ANDROID_COMPILE_SDK "33"
