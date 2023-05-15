@@ -29,5 +29,6 @@ RUN echo y | android-sdk-linux/cmdline-tools/latest/bin/sdkmanager "extras;googl
 # install FastLane
 COPY Gemfile.lock .
 COPY Gemfile .
-RUN gem install bundler -v 1.16.6
+RUN gem install bundler
 RUN bundle install
+RUN bundle update fastlane
