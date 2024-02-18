@@ -1,114 +1,130 @@
-stages:
-  - environment
-  - build
-  - test
-  - internal
-  - alpha
-  - beta
-  - production
+[0KRunning with gitlab-runner 11.9.0-rc2 (227934c0)
+[0;m[0K  on docker-auto-scale fa6cab46
+[0;m[0KUsing Docker executor with image registry.gitlab.com/gitlab-org/project-templates/android:master ...
+[0;m[0KPulling docker image registry.gitlab.com/gitlab-org/project-templates/android:master ...
+[0;m[0KUsing docker image sha256:af7bac5a71c02e26c90e91d21d7960b4fec48873b458d35effb14dc1d2061b70 for registry.gitlab.com/gitlab-org/project-templates/android:master ...
+[0;msection_start:1553168188:prepare_script[0KRunning on runner-fa6cab46-project-10953870-concurrent-0 via runner-fa6cab46-srm-1553168030-6799b056...
+section_end:1553168193:prepare_script[0Ksection_start:1553168193:get_sources[0KInitialized empty Git repository in /builds/gitlab-org/project-templates/android/.git/
+[32;1mFetching changes...[0;m
+[32;1mCreated fresh repository.[0;m
+From https://gitlab.com/gitlab-org/project-templates/android
+ * [new branch]      master     -> origin/master
+[32;1mChecking out ded692b8 as master...[0;m
 
+[32;1mSkipping Git submodules setup[0;m
+section_end:1553168194:get_sources[0Ksection_start:1553168194:restore_cache[0Ksection_end:1553168196:restore_cache[0Ksection_start:1553168196:download_artifacts[0Ksection_end:1553168199:download_artifacts[0Ksection_start:1553168199:build_script[0K[32;1m$ export VERSION_CODE=$(($CI_PIPELINE_IID)) && echo $VERSION_CODE[0;m
+1
+[32;1m$ export VERSION_SHA=`echo ${CI_COMMIT_SHA:0:8}` && echo $VERSION_SHA[0;m
+ded692b8
+[32;1m$ bundle exec fastlane buildRelease[0;m
+[11:36:42]: Sending anonymous analytics information
+[11:36:42]: Learn more at https://docs.fastlane.tools/#metrics
+[11:36:42]: No personal or sensitive data is sent.
+[11:36:42]: You can disable this by adding `opt_out_usage` at the top of your Fastfile
+[11:36:42]: [32m------------------------------[0m
+[11:36:42]: [32m--- Step: default_platform ---[0m
+[11:36:42]: [32m------------------------------[0m
+[11:36:42]: [32mDriving the lane 'android buildRelease' 🚀[0m
+[11:36:42]: [32m--------------------[0m
+[11:36:42]: [32m--- Step: gradle ---[0m
+[11:36:42]: [32m--------------------[0m
+[11:36:42]: [36m$ /builds/gitlab-org/project-templates/android/gradlew assembleRelease -p .[0m
++------------------+----------------------+
+|              [33mLane Context[0m               |
++------------------+----------------------+
+| DEFAULT_PLATFORM | android              |
+| PLATFORM_NAME    | android              |
+| LANE_NAME        | android buildRelease |
++------------------+----------------------+
+[11:36:42]: [31mPermission denied - /builds/gitlab-org/project-templates/android/gradlew[0m
 
-.updateContainerJob:
-  image: docker:stable
-  stage: environment
-  services:
-    - docker:dind
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG || true
-    - docker build --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
++------+------------------+-------------+
+|           [32mfastlane summary[0m            |
++------+------------------+-------------+
+| Step | Action           | Time (in s) |
++------+------------------+-------------+
+| 1    | default_platform | 0           |
+| 💥   | [31mgradle[0m           | 0           |
++------+------------------+-------------+
 
-updateContainer:
-  extends: .updateContainerJob
-  only:
-    changes:
-      - Dockerfile
+[11:36:42]: [31mfastlane finished with errors[0m
 
-ensureContainer:
-  extends: .updateContainerJob
-  allow_failure: true
-  before_script:
-    - "mkdir -p ~/.docker && echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    # Skip update container `script` if the container already exists
-    # via https://gitlab.com/gitlab-org/gitlab-ce/issues/26866#note_97609397 -> https://stackoverflow.com/a/52077071/796832
-    - docker manifest inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG > /dev/null && exit || true
-  except:
-    changes:
-      - Dockerfile
+Looking for related GitHub issues on fastlane/fastlane...
 
+Found no similar issues. To create a new issue, please visit:
+https://github.com/fastlane/fastlane/issues/new
+Run `fastlane env` to append the fastlane environment to your issue
 
-.build_job:
-  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  stage: build
-  before_script:
-    - chmod +x gradlew
-    - "export VERSION_CODE=$(($CI_PIPELINE_IID)) && echo $VERSION_CODE"
-    - "export VERSION_SHA=`echo ${CI_COMMIT_SHA:0:8}` && echo $VERSION_SHA"
-  artifacts:
-    paths:
-      - app/build/outputs
+#######################################################################
+# fastlane 2.118.1 is available. You are on 2.116.0.
+# You should use the latest version.
+# Please update using `bundle update fastlane`.
+#######################################################################
 
-buildDebug:
-  extends: .build_job
-  script:
-    - bundle exec fastlane buildDebug
+[32m2.118.1 Fix for finding keychain[0m
+* [match] fix for issue with not finding keychain (#14425) via Josh Holtz
 
-buildRelease:
-  extends: .build_job
-  script:
-    - bundle exec fastlane buildRelease
-  environment:
-    name: production
+[32m2.118.0 Improvements[0m
+* [action] fix showing macOS notification via `notification` action (#14407) via Daniel Jankowski
+* [scan] skip unavailable os_versions from simclt output (#14388) via Bartosz Polaczyk
+* [action] added new spaceship_logs action (#14394) via Josh Holtz
+* [pilot] add option for `uses_non_exempt_encryption` and wait for processing again when being set (#14401) via Josh Holtz
+* Improve SnapshotHelper.swift to support snapshotting for multiple apps. (#14367) via Rollback Master
+* [pilot] added extra documentation for skip_waiting_for_build_processing (#14216) via Mike James
+* [snapshot] fixed issue where a bad Locale could be set if neither a locale nor language could be detected. (#14306) via John Szumski
+* [action] added Appcenter plugin link to use instead of hockeyApp (#14325) via Mariano Ksairi
+* [match] clean up match/sync_code_signing docs (#14333) via Jan Piotrowski
+* [action] add skip_import_validation and skip_tests parameters to pod_push action (#14370) via Daniel Jankowski
+* [resign.sh] don't create archived-expanded-entitlements.xcent if xcode10 (#14335) via Arnas Dundulis
+* [fastlane] fix keychain shellescaping (#14311) via Jens Page
+* [screengrab] add documentation on how to detect screengrab at runtime (#14303) via Jan Piotrowski
+* [setup] support .gradle.kts project (#13672) via Ryo Sakaguchi
+* [action] automatic_code_signing - create TargetAttributes for targets missing them (#12782) via Joel Duifhuis
+* [pem] create webpush certificates (#10597) via Jason Hanggi
+* [match] git delete file need to clean and also fix error. (#14313) via krish722
+* [gym] detect true build configuration for archive action (#14054) via Adrian Kashivskyy
+* [action] hockeyapp: Include Hockey CDN bypass example (#14302) via Jan Piotrowski
+* [supply] Enable obb updating (#14269) via Petr Pošvic
+* [action] add --no-verify option to push_to_git_remote (#14288) via Jack Brown
+* [action] import_certificate - resort options, add text about private keys and add another example (#14281) via Jan Piotrowski
 
-testDebug:
-  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  stage: test
-  dependencies:
-    - buildDebug
-  script:
-    - chmod +x gradlew
-    - bundle exec fastlane test
+[32m2.117.1 Fix for pilot submission[0m
+* [pilot] fix for pilot submit review (#14331) via Josh Holtz
 
-.promote_job:
-  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  when: manual
-  dependencies: [ ]
-  before_script:
-    - echo You need to add your google_play_api_key.json file for this to work. Please see project's README.md. && false
-    - chmod +x gradlew
-  after_script:
-    - rm -f ~/google_play_api_key.json
+[32mTo see all new releases, open https://github.com/fastlane/fastlane/releases[0m
 
-publishInternal:
-  extends: .promote_job
-  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  stage: internal
-  dependencies:
-    - buildRelease
-  when: manual
-  script:
-    - bundle exec fastlane internal
-
-promoteAlpha:
-  extends: .promote_job
-  stage: alpha
-  script:
-    - bundle exec fastlane promote_internal_to_alpha
-
-promoteBeta:
-  extends: .promote_job
-  stage: beta
-  script:
-    - bundle exec fastlane promote_alpha_to_beta
-
-promoteProduction:
-  extends: .promote_job
-  stage: production
-  # We only allow production promotion on main because
-  # in this way you can protect production scoped secret variables
-  only:
-    - main
-  script:
-    - bundle exec fastlane promote_beta_to_production
+[32mPlease update using `bundle update fastlane`[0m
+/usr/lib/ruby/2.3.0/open3.rb:199:in `spawn': [31m[!] Permission denied - /builds/gitlab-org/project-templates/android/gradlew[0m (Errno::EACCES)
+	from /usr/lib/ruby/2.3.0/open3.rb:199:in `popen_run'
+	from /usr/lib/ruby/2.3.0/open3.rb:190:in `popen2e'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/helper/sh_helper.rb:54:in `sh_control_output'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/helper/gradle_helper.rb:32:in `trigger'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/actions/gradle.rb:52:in `run'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/runner.rb:253:in `block (2 levels) in execute_action'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/actions/actions_helper.rb:50:in `execute_action'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/runner.rb:232:in `block in execute_action'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/runner.rb:227:in `chdir'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/runner.rb:227:in `execute_action'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/runner.rb:157:in `trigger_action_by_name'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/fast_file.rb:154:in `method_missing'
+	from Fastfile:27:in `block (2 levels) in parsing_binding'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/lane.rb:33:in `call'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/runner.rb:49:in `block in execute'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/runner.rb:45:in `chdir'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/runner.rb:45:in `execute'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/lane_manager.rb:56:in `cruise_lane'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/command_line_handler.rb:36:in `handle'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/commands_generator.rb:108:in `block (2 levels) in run'
+	from /var/lib/gems/2.3.0/gems/commander-fastlane-4.4.6/lib/commander/command.rb:178:in `call'
+	from /var/lib/gems/2.3.0/gems/commander-fastlane-4.4.6/lib/commander/command.rb:153:in `run'
+	from /var/lib/gems/2.3.0/gems/commander-fastlane-4.4.6/lib/commander/runner.rb:476:in `run_active_command'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:76:in `run!'
+	from /var/lib/gems/2.3.0/gems/commander-fastlane-4.4.6/lib/commander/delegates.rb:15:in `run!'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/commands_generator.rb:333:in `run'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/commands_generator.rb:41:in `start'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/fastlane/lib/fastlane/cli_tools_distributor.rb:113:in `take_off'
+	from /var/lib/gems/2.3.0/gems/fastlane-2.116.0/bin/fastlane:23:in `<top (required)>'
+	from /usr/local/bin/fastlane:22:in `load'
+	from /usr/local/bin/fastlane:22:in `<main>'
+section_end:1553168204:build_script[0Ksection_start:1553168204:after_script[0Ksection_end:1553168205:after_script[0Ksection_start:1553168205:upload_artifacts_on_failure[0Ksection_end:1553168207:upload_artifacts_on_failure[0K[31;1mERROR: Job failed: exit code 1
+[0;m
